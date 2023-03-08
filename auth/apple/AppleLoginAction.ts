@@ -1,26 +1,12 @@
-import {LoginUser} from './AppleLoginAction';
 import {appleAuth} from '@invertase/react-native-apple-authentication';
+import auth, {FirebaseAuthTypes} from '@react-native-firebase/auth';
 import {Alert} from 'react-native';
-
-export enum UserType {
-  APPLE,
-  GOOGLE,
-  FACEBOOK,
-  KAKAO,
-  NAVER,
-  TWITTER,
-  MICROSOFT,
-}
-export interface LoginUser {
-  type: UserType;
-  userId: string;
-  nickname: string;
-  token: string;
-  refreshToken?: string;
-}
+import {LoginUser} from '../LoginUser';
+import {UserType} from '../UserType';
 
 export interface AppleUser extends LoginUser {
-  nonce: string;
+  nonce?: string;
+  user?: FirebaseAuthTypes.User;
 }
 
 export async function doSignIntByApple(): Promise<AppleUser | null> {
@@ -63,21 +49,9 @@ export async function doSignIntByApple(): Promise<AppleUser | null> {
 }
 
 export async function doSignOutByApple(userId: string) {
-  const appleAuthRequestResponse = await appleAuth.performRequest({
-    requestedOperation: appleAuth.Operation.LOGOUT,
-    user: userId
-  });
-
-  console.log('Response', appleAuthRequestResponse);
-  const credentialState = await appleAuth.getCredentialStateForUser(
-    appleAuthRequestResponse.user,
-  );
-
-  if (credentialState === appleAuth.State.REVOKED) {
-    console.log('UserStore::logout - apple credential successfully revoked');
-  }
+  await auth().signOut();
 }
-export async function onLoginByFirebase() {
+export async function onSignInByFirebase(): Promise<AppleUser | null> {
   try {
     // performs login request
     const appleAuthRequestResponse = await appleAuth.performRequest({
@@ -94,12 +68,28 @@ export async function onLoginByFirebase() {
 
     // Create a Firebase credential from the response
     const {identityToken, nonce} = appleAuthRequestResponse;
-    // const appleCredential = auth.AppleAuthProvider.credential(
-    //   identityToken,
-    //   nonce,
-    // );
+    const appleCredential = auth.AppleAuthProvider.credential(
+      identityToken,
+      nonce,
+    );
+    // Sign the user in with the credential
+    const userCredential = await auth().signInWithCredential(appleCredential);
+    console.log('apple User', userCredential);
+    return {
+      type: UserType.APPLE,
+      userId: appleAuthRequestResponse.user,
+      nickname: appleAuthRequestResponse.fullName?.nickname || 'Unknown',
+      token: appleAuthRequestResponse.identityToken,
+      nonce: appleAuthRequestResponse.nonce,
+      user: userCredential.user,
+    };
   } catch (error: any) {
-    console.error('Error', error);
-    Alert.alert(error);
+    if (error.code === '1001') {
+      console.log('CANCELED');
+    } else {
+      console.error(error);
+      Alert.alert('Error', error.message);
+    }
   }
+  return null;
 }

@@ -7,7 +7,7 @@ import {
 } from '@invertase/react-native-apple-authentication';
 import {
   AppleUser,
-  doSignIntByApple,
+  onSignInByFirebase,
   doSignOutByApple,
 } from './AppleLoginAction';
 
@@ -15,7 +15,8 @@ export const AppleLogin = () => {
   const [user, setUser] = useState<AppleUser | null>();
 
   const doSignIn = async () => {
-    setUser(await doSignIntByApple());
+    // setUser(await doSignIntByApple());
+    setUser(await onSignInByFirebase());
   };
 
   const doSignOut = async () => {
@@ -77,9 +78,9 @@ export const AppleLogin = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    flexDirection: 'column',
+    // flexDirection: 'column',
     justifyContent: 'center',
-    alignItems: 'center',
+    // alignItems: 'center',
   },
   not_supported: {
     color: 'red',
@@ -87,10 +88,6 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   logout_btn_signout_container: {
-    width: '80%',
-    height: '10%',
-    marginTop: 20,
-    marginLeft: 50,
     justifyContent: 'center',
     alignItems: 'center',
   },
