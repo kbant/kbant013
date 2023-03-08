@@ -4,7 +4,11 @@ import {
   GoogleSignin,
   GoogleSigninButton,
 } from '@react-native-google-signin/google-signin';
-import {GoogleUser, doSignOut, onSignInByFirebase} from './GoogleLoginAction';
+import {
+  GoogleUser,
+  doSignOutByGoogle,
+  onSignInByFirebase,
+} from './GoogleLoginAction';
 
 export const GoogleLogin = () => {
   const [user, setUser] = useState<GoogleUser | null>();
@@ -18,7 +22,7 @@ export const GoogleLogin = () => {
 
   const doSignOut = async () => {
     if (user) {
-      await doSignOut();
+      await doSignOutByGoogle();
     }
     setUser(null);
   };

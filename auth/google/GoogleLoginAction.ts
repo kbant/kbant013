@@ -17,15 +17,17 @@ GoogleSignin.configure({
     '422166043165-k7i5m4sn8fj1qt1ci06ninu8snet4qk4.apps.googleusercontent.com',
 });
 
-export async function doSignOut() {
+export async function doSignOutByGoogle() {
   const isSignedIn = await GoogleSignin.isSignedIn();
   if (isSignedIn) {
     try {
+      await auth().signOut();
       await GoogleSignin.revokeAccess();
       await GoogleSignin.signOut();
-      await auth().signOut();
+      console.log('Sign Out');
     } catch (error: any) {
-      Alert.alert(error.message);
+      console.error(error);
+      Alert.alert('Error', error.message);
     }
   }
 }
